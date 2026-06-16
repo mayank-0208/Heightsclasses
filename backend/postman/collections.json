@@ -1,0 +1,960 @@
+{
+  "workspace": "88ea6a55-284f-40a6-968e-9d46aa9ca320",
+  "collections": [
+    {
+      "info": {
+        "name": "01 - Health",
+        "description": "Health check endpoint for Coaching ERP API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5001/api/v1" }
+      ],
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "auth": { "type": "noauth" }
+          }
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "02 - Authentication",
+        "description": "Login, logout, password management, and user CRUD (Admin only)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5001/api/v1" },
+        { "key": "accessToken", "value": "" },
+        { "key": "userId", "value": "" },
+        { "key": "teacherId", "value": "" }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Login (Admin)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.data?.accessToken) {",
+                "  pm.environment.set('accessToken', res.data.accessToken);",
+                "  pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                "}",
+                "if (res.data?.refreshToken) pm.environment.set('refreshToken', res.data.refreshToken);",
+                "if (res.data?.user?._id) {",
+                "  pm.environment.set('userId', res.data.user._id);",
+                "  pm.collectionVariables.set('userId', res.data.user._id);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@coaching.com\",\n  \"password\": \"Admin@12345\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "auth": { "type": "noauth" }
+          }
+        },
+        {
+          "name": "Login (Teacher)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"teacher@coaching.com\",\n  \"password\": \"Teacher@123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "auth": { "type": "noauth" }
+          }
+        },
+        {
+          "name": "Login (Student)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@coaching.com\",\n  \"password\": \"Student@123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "auth": { "type": "noauth" }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/refresh-token",
+            "auth": { "type": "noauth" }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"teacher@coaching.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/forgot-password",
+            "auth": { "type": "noauth" }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"paste-reset-token-here\",\n  \"newPassword\": \"NewPassword@123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/reset-password",
+            "auth": { "type": "noauth" }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/auth/logout" }
+        },
+        {
+          "name": "Get Profile",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/auth/profile" }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Admin@12345\",\n  \"newPassword\": \"NewAdmin@12345\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/change-password"
+          }
+        },
+        {
+          "name": "Create User (Teacher)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.data?._id) {",
+                "  pm.environment.set('teacherId', res.data._id);",
+                "  pm.collectionVariables.set('teacherId', res.data._id);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Teacher\",\n  \"email\": \"teacher@coaching.com\",\n  \"phone\": \"9876543210\",\n  \"password\": \"Teacher@123\",\n  \"role\": \"teacher\",\n  \"mustChangePassword\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/users"
+          }
+        },
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/users?page=1&limit=10&role=teacher",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "users"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "role", "value": "teacher" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Teacher Updated\",\n  \"phone\": \"9876543211\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/users/{{teacherId}}"
+          }
+        },
+        {
+          "name": "Deactivate User",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/auth/users/{{teacherId}}" }
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "03 - Students",
+        "description": "Student management - Admin creates students with full profile",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5001/api/v1" },
+        { "key": "accessToken", "value": "" },
+        { "key": "batchId", "value": "" },
+        { "key": "studentId", "value": "" }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Create Student",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.data?.user?._id) {",
+                "  pm.environment.set('studentId', res.data.user._id);",
+                "  pm.collectionVariables.set('studentId', res.data.user._id);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Rahul Student\",\n  \"email\": \"student@coaching.com\",\n  \"phone\": \"9123456789\",\n  \"password\": \"Student@123\",\n  \"batch\": \"{{batchId}}\",\n  \"fatherName\": \"Father Name\",\n  \"motherName\": \"Mother Name\",\n  \"address\": \"123 Main Street, City\",\n  \"joiningDate\": \"2026-01-15\",\n  \"dateOfBirth\": \"2008-05-20\",\n  \"emergencyContact\": \"9988776655\",\n  \"totalFee\": 50000,\n  \"dueDate\": \"2026-03-01\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/students"
+          }
+        },
+        {
+          "name": "List Students",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/students?page=1&limit=10",
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }, { "key": "batchId", "value": "{{batchId}}", "disabled": true }]
+            }
+          }
+        },
+        {
+          "name": "Get Student by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/students/{{studentId}}" }
+        },
+        {
+          "name": "Get Students by Batch",
+          "request": { "method": "GET", "url": "{{baseUrl}}/students/batch/{{batchId}}" }
+        },
+        {
+          "name": "Update Student",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Rahul Student Updated\",\n  \"fatherName\": \"Updated Father Name\",\n  \"emergencyContact\": \"9988776656\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/students/{{studentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "04 - Batches",
+        "description": "Batch management with assigned teachers",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5001/api/v1" },
+        { "key": "accessToken", "value": "" },
+        { "key": "teacherId", "value": "" },
+        { "key": "batchId", "value": "" }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Create Batch",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.data?._id) {",
+                "  pm.environment.set('batchId', res.data._id);",
+                "  pm.collectionVariables.set('batchId', res.data._id);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"batchName\": \"JEE 2026\",\n  \"description\": \"JEE preparation batch for 2026\",\n  \"startDate\": \"2026-01-01\",\n  \"endDate\": \"2026-12-31\",\n  \"assignedTeacher\": \"{{teacherId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/batches"
+          }
+        },
+        {
+          "name": "List Batches",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/batches?page=1&limit=10&isActive=true",
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }, { "key": "isActive", "value": "true" }]
+            }
+          }
+        },
+        {
+          "name": "My Batches (Teacher)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/batches/my-batches" }
+        },
+        {
+          "name": "Get Batch by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/batches/{{batchId}}" }
+        },
+        {
+          "name": "Update Batch",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated JEE batch description\",\n  \"isActive\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/batches/{{batchId}}"
+          }
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "05 - Attendance",
+        "description": "Mark and manage student attendance",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5001/api/v1" },
+        { "key": "accessToken", "value": "" },
+        { "key": "studentId", "value": "" },
+        { "key": "attendanceId", "value": "" }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Mark Attendance",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.data?._id) {",
+                "  pm.environment.set('attendanceId', res.data._id);",
+                "  pm.collectionVariables.set('attendanceId', res.data._id);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"date\": \"2026-06-15\",\n  \"status\": \"Present\",\n  \"entryTime\": \"09:00\",\n  \"exitTime\": \"17:00\",\n  \"remarks\": \"On time\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/attendance"
+          }
+        },
+        {
+          "name": "Bulk Mark Attendance",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-06-16\",\n  \"records\": [\n    {\n      \"studentId\": \"{{studentId}}\",\n      \"status\": \"Present\",\n      \"entryTime\": \"09:05\",\n      \"exitTime\": \"17:00\"\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/attendance/bulk"
+          }
+        },
+        {
+          "name": "Update Attendance",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Late\",\n  \"entryTime\": \"09:30\",\n  \"remarks\": \"Arrived late\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/attendance/{{attendanceId}}"
+          }
+        },
+        {
+          "name": "Get Student Attendance",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/attendance/student/{{studentId}}?startDate=2026-01-01&endDate=2026-12-31",
+              "query": [{ "key": "startDate", "value": "2026-01-01" }, { "key": "endDate", "value": "2026-12-31" }]
+            }
+          }
+        },
+        {
+          "name": "Attendance Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/attendance/report?page=1&limit=10&batchId={{batchId}}",
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }, { "key": "batchId", "value": "{{batchId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Attendance Analytics",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/attendance/analytics?studentId={{studentId}}",
+              "query": [{ "key": "studentId", "value": "{{studentId}}" }, { "key": "batchId", "value": "{{batchId}}", "disabled": true }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "06 - Tests",
+        "description": "Test creation and management",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5001/api/v1" },
+        { "key": "accessToken", "value": "" },
+        { "key": "batchId", "value": "" },
+        { "key": "testId", "value": "" }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Create Test",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.data?._id) {",
+                "  pm.environment.set('testId', res.data._id);",
+                "  pm.collectionVariables.set('testId', res.data._id);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"testName\": \"Unit Test 1\",\n  \"subject\": \"Physics\",\n  \"totalMarks\": 100,\n  \"batchId\": \"{{batchId}}\",\n  \"testDate\": \"2026-06-20\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/tests"
+          }
+        },
+        {
+          "name": "List Tests",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/tests?page=1&limit=10&batchId={{batchId}}",
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }, { "key": "batchId", "value": "{{batchId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get Test by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/tests/{{testId}}" }
+        },
+        {
+          "name": "Update Test",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"testName\": \"Unit Test 1 - Updated\",\n  \"totalMarks\": 100\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/tests/{{testId}}"
+          }
+        },
+        {
+          "name": "Delete Test",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/tests/{{testId}}" }
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "07 - Results",
+        "description": "Enter marks and view results with auto rank calculation",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5001/api/v1" },
+        { "key": "accessToken", "value": "" },
+        { "key": "studentId", "value": "" },
+        { "key": "testId", "value": "" },
+        { "key": "resultId", "value": "" }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Create Result",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.data?._id) {",
+                "  pm.environment.set('resultId', res.data._id);",
+                "  pm.collectionVariables.set('resultId', res.data._id);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"testId\": \"{{testId}}\",\n  \"obtainedMarks\": 85\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/results"
+          }
+        },
+        {
+          "name": "Bulk Enter Results",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"testId\": \"{{testId}}\",\n  \"results\": [\n    {\n      \"studentId\": \"{{studentId}}\",\n      \"obtainedMarks\": 92\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/results/bulk"
+          }
+        },
+        {
+          "name": "Update Result",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"obtainedMarks\": 90\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/results/{{resultId}}"
+          }
+        },
+        {
+          "name": "Get Results by Test",
+          "request": { "method": "GET", "url": "{{baseUrl}}/results/test/{{testId}}" }
+        },
+        {
+          "name": "Get Results by Student",
+          "request": { "method": "GET", "url": "{{baseUrl}}/results/student/{{studentId}}" }
+        },
+        {
+          "name": "Get Rank Summary",
+          "request": { "method": "GET", "url": "{{baseUrl}}/results/rank/{{studentId}}" }
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "08 - Notes",
+        "description": "Upload and manage study notes (PDF, DOCX, PPTX, PNG, JPG)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5001/api/v1" },
+        { "key": "accessToken", "value": "" },
+        { "key": "batchId", "value": "" },
+        { "key": "noteId", "value": "" }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Upload Note",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.data?._id) {",
+                "  pm.environment.set('noteId', res.data._id);",
+                "  pm.collectionVariables.set('noteId', res.data._id);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Physics Chapter 1", "type": "text" },
+                { "key": "description", "value": "Mechanics notes for JEE preparation", "type": "text" },
+                { "key": "subject", "value": "Physics", "type": "text" },
+                { "key": "batchId", "value": "{{batchId}}", "type": "text" },
+                { "key": "file", "type": "file", "src": [], "description": "Select a PDF/DOCX/PPTX/PNG/JPG file" }
+              ]
+            },
+            "url": "{{baseUrl}}/notes"
+          }
+        },
+        {
+          "name": "List Notes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/notes?page=1&limit=10&batchId={{batchId}}",
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }, { "key": "batchId", "value": "{{batchId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get Note by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/notes/{{noteId}}" }
+        },
+        {
+          "name": "Delete Note",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/notes/{{noteId}}" }
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "09 - Fees",
+        "description": "Fee tracking, payments, and defaulter reports",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5001/api/v1" },
+        { "key": "accessToken", "value": "" },
+        { "key": "studentId", "value": "" },
+        { "key": "feeId", "value": "" }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Create Fee Record",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.data?._id) {",
+                "  pm.environment.set('feeId', res.data._id);",
+                "  pm.collectionVariables.set('feeId', res.data._id);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"totalFee\": 50000,\n  \"dueDate\": \"2026-03-01\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/fees"
+          }
+        },
+        {
+          "name": "List Fees",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/fees?page=1&limit=10&hasPending=true",
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }, { "key": "hasPending", "value": "true" }]
+            }
+          }
+        },
+        {
+          "name": "Get Fee by Student",
+          "request": { "method": "GET", "url": "{{baseUrl}}/fees/student/{{studentId}}" }
+        },
+        {
+          "name": "Record Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 10000,\n  \"paymentDate\": \"2026-06-15\",\n  \"paymentMethod\": \"UPI\",\n  \"transactionId\": \"TXN123456\",\n  \"remarks\": \"First installment\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/fees/{{feeId}}/payment"
+          }
+        },
+        {
+          "name": "Get Defaulters",
+          "request": { "method": "GET", "url": "{{baseUrl}}/fees/defaulters" }
+        },
+        {
+          "name": "Pending Fee Report",
+          "request": { "method": "GET", "url": "{{baseUrl}}/fees/pending-report" }
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "10 - Announcements",
+        "description": "Create and manage batch announcements",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5001/api/v1" },
+        { "key": "accessToken", "value": "" },
+        { "key": "batchId", "value": "" },
+        { "key": "announcementId", "value": "" }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Create Announcement",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.data?._id) {",
+                "  pm.environment.set('announcementId', res.data._id);",
+                "  pm.collectionVariables.set('announcementId', res.data._id);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Holiday Notice\",\n  \"content\": \"Institute will remain closed on 20th June for maintenance.\",\n  \"targetBatch\": \"{{batchId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/announcements"
+          }
+        },
+        {
+          "name": "List Announcements",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/announcements?page=1&limit=10",
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }, { "key": "targetBatch", "value": "{{batchId}}", "disabled": true }]
+            }
+          }
+        },
+        {
+          "name": "Get Announcement by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/announcements/{{announcementId}}" }
+        },
+        {
+          "name": "Mark as Read (Student)",
+          "request": { "method": "POST", "url": "{{baseUrl}}/announcements/{{announcementId}}/read" }
+        },
+        {
+          "name": "Delete Announcement",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/announcements/{{announcementId}}" }
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "11 - Dashboard",
+        "description": "Role-based dashboard analytics",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5001/api/v1" },
+        { "key": "accessToken", "value": "" }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        { "name": "Admin Dashboard", "request": { "method": "GET", "url": "{{baseUrl}}/dashboard/admin" } },
+        { "name": "Teacher Dashboard", "request": { "method": "GET", "url": "{{baseUrl}}/dashboard/teacher" } },
+        { "name": "Student Dashboard", "request": { "method": "GET", "url": "{{baseUrl}}/dashboard/student" } }
+      ]
+    },
+    {
+      "info": {
+        "name": "12 - Reports & Audit",
+        "description": "Export reports and view audit logs",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5001/api/v1" },
+        { "key": "accessToken", "value": "" },
+        { "key": "batchId", "value": "" },
+        { "key": "testId", "value": "" }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Attendance Report (JSON)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/attendance?batchId={{batchId}}&startDate=2026-01-01&endDate=2026-12-31&format=json",
+              "query": [
+                { "key": "batchId", "value": "{{batchId}}" },
+                { "key": "startDate", "value": "2026-01-01" },
+                { "key": "endDate", "value": "2026-12-31" },
+                { "key": "format", "value": "json" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Attendance Report (CSV)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/attendance?batchId={{batchId}}&format=csv",
+              "query": [{ "key": "batchId", "value": "{{batchId}}" }, { "key": "format", "value": "csv" }]
+            }
+          }
+        },
+        {
+          "name": "Attendance Report (Excel)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/attendance?batchId={{batchId}}&format=excel",
+              "query": [{ "key": "batchId", "value": "{{batchId}}" }, { "key": "format", "value": "excel" }]
+            }
+          }
+        },
+        {
+          "name": "Results Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/results?testId={{testId}}&format=json",
+              "query": [{ "key": "testId", "value": "{{testId}}" }, { "key": "format", "value": "json" }]
+            }
+          }
+        },
+        {
+          "name": "Fee Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/fees?format=json&defaultersOnly=false",
+              "query": [{ "key": "format", "value": "json" }, { "key": "defaultersOnly", "value": "false" }]
+            }
+          }
+        },
+        {
+          "name": "Audit Logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/audit-logs?page=1&limit=20",
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
