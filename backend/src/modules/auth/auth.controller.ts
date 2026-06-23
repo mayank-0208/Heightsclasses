@@ -6,7 +6,8 @@ import { asString } from '../../utils/helpers';
 export const authController = {
   login: async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const result = await authService.login(req.body.email, req.body.password);
+      const identifier = req.body.email || req.body.username || req.body.studentId;
+      const result = await authService.login(identifier, req.body.password);
       sendSuccess(res, result);
     } catch (error) {
       next(error);

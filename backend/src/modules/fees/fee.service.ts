@@ -76,12 +76,28 @@ export const feeService = {
   getDefaulters: async () => feeRepository.findDefaulters(),
 
   getPendingReport: async () => {
-    const fees = await Fee.find({ pendingFee: { $gt: 0 } })
+    const allFees = await Fee.find()
       .populate('studentId', 'fullName studentId email batch')
-      .sort({ pendingFee: -1 })
       .exec();
 
-    const totalPending = fees.reduce((sum, f) => sum + f.pendingFee, 0);
-    return { fees, totalPending, count: fees.length };
+    const totalCollected = allFees.reduce((sum, f) => sum + f.paidFee, 0);
+    const totalPending = allFees.reduce((sum, f) => sum + f.pendingFee, 0);
+
+    const now = new Date();
+    const defaultersCount = allFees.filter(
+      (f) => f.pendingFee > 0 && f.dueDate && new Date(f.dueDate) < now
+    ).length;
+
+    const fees = allFees
+      .filter((f) => f.pendingFee > 0)
+      .sort((a, b) => b.pendingFee - a.pendingFee);
+
+    return {
+      fees,
+      totalCollected,
+      totalPending,
+      count: fees.length,
+      defaultersCount,
+    };
   },
 };

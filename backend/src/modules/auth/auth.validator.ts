@@ -6,7 +6,7 @@ const passwordSchema = z
 
 export const loginSchema = z.object({
   body: z.object({
-    email: z.string().email('Invalid email address'),
+    email: z.string().min(3, 'Email or Roll No is required'),
     password: z.string().min(1, 'Password is required'),
   }),
 });

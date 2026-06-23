@@ -92,9 +92,27 @@ export const studentService = {
     }
   },
 
-  getAll: async (query: PaginationQuery, batchId?: string) => {
+  getAll: async (query: PaginationQuery, batchId?: string, userRole?: string, userId?: string) => {
     const filter: Record<string, unknown> = { role: 'student' };
-    if (batchId) filter.batch = batchId;
+
+    if (userRole === 'teacher' && userId) {
+      const teacherBatches = await Batch.find({ assignedTeacher: new mongoose.Types.ObjectId(userId) }).select('_id');
+      const teacherBatchIds = teacherBatches.map((b) => b._id);
+
+      if (batchId) {
+        const hasAccess = teacherBatchIds.some((id) => id.toString() === batchId);
+        if (!hasAccess) {
+          filter.batch = new mongoose.Types.ObjectId();
+        } else {
+          filter.batch = new mongoose.Types.ObjectId(batchId);
+        }
+      } else {
+        filter.batch = { $in: teacherBatchIds };
+      }
+    } else {
+      if (batchId) filter.batch = new mongoose.Types.ObjectId(batchId);
+    }
+
     return paginate(User, filter, query, ['fullName', 'email', 'studentId'], 'batch');
   },
 

@@ -1,0 +1,5 @@
+This is a dummy study note for physics velocity and acceleration lesson.
+Formulas:
+v = u + at
+s = ut + 0.5at^2
+v^2 = u^2 + 2as

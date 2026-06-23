@@ -15,6 +15,19 @@ export const authRepository = {
     return query.exec();
   },
 
+  findByIdentifier: (identifier: string, includePassword = false): Promise<IUser | null> => {
+    const query = User.findOne({
+      $or: [
+        { email: identifier.toLowerCase() },
+        { studentId: identifier.toUpperCase() }
+      ]
+    });
+    if (includePassword) {
+      query.select('+password +refreshToken +resetPasswordToken +resetPasswordExpires');
+    }
+    return query.exec();
+  },
+
   findById: (id: string, includeSecrets = false): Promise<IUser | null> => {
     const query = User.findById(id);
     if (includeSecrets) {

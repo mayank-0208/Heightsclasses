@@ -34,15 +34,15 @@ const sanitizeUser = (user: IUser) => ({
 });
 
 export const authService = {
-  login: async (email: string, password: string): Promise<LoginResult> => {
-    const user = await authRepository.findByEmail(email, true);
+  login: async (identifier: string, password: string): Promise<LoginResult> => {
+    const user = await authRepository.findByIdentifier(identifier, true);
     if (!user || !user.isActive) {
-      throw new UnauthorizedError('Invalid email or password');
+      throw new UnauthorizedError('Invalid credentials');
     }
 
     const isValid = await authRepository.comparePassword(password, user.password);
     if (!isValid) {
-      throw new UnauthorizedError('Invalid email or password');
+      throw new UnauthorizedError('Invalid credentials');
     }
 
     const payload = { userId: user._id.toString(), role: user.role, email: user.email };

@@ -1,4 +1,6 @@
 import { Readable } from 'stream';
+import fs from 'fs';
+import path from 'path';
 import { Note } from './note.model';
 import { noteRepository } from './note.repository';
 import { Batch } from '../batches/batch.model';
@@ -20,8 +22,15 @@ export const noteService = {
     let secureUrl = '';
 
     if (env.CLOUDINARY_CLOUD_NAME === 'dev-cloud') {
-      // Mock upload for testing/development environments without active Cloudinary credentials
-      secureUrl = `https://res.cloudinary.com/dev-cloud/raw/upload/v1234567890/mock-note-${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      // Save file locally for development/testing
+      const filename = `mock-note-${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const uploadsDir = path.join(__dirname, '../../../uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      fs.writeFileSync(path.join(uploadsDir, filename), file.buffer);
+      const backendUrl = env.BACKEND_URL || 'http://localhost:5001';
+      secureUrl = `${backendUrl}/uploads/${filename}`;
     } else {
       const uploadResult = await new Promise<{ secure_url: string }>((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -73,6 +82,14 @@ export const noteService = {
     if (env.CLOUDINARY_CLOUD_NAME !== 'dev-cloud') {
       const publicId = note.fileUrl.split('/').slice(-2).join('/').split('.')[0];
       await cloudinary.uploader.destroy(publicId, { resource_type: 'auto' }).catch(() => {});
+    } else {
+      const filename = note.fileUrl.split('/').pop();
+      if (filename) {
+        const filepath = path.join(__dirname, '../../../uploads', filename);
+        if (fs.existsSync(filepath)) {
+          fs.unlinkSync(filepath);
+        }
+      }
     }
 
     return note;
